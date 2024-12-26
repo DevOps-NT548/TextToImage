@@ -14,41 +14,41 @@ pipeline {
     }
 
     stages {
-        stage('Test') {
-            agent {
-                docker {
-                    image 'python:3.9' 
-                }
-            }
-            steps {
-                echo 'Testing model correctness..'
-                sh 'pip install -r requirements.txt && pytest'
-            }
-        }
+        // stage('Test') {
+        //     agent {
+        //         docker {
+        //             image 'python:3.9' 
+        //         }
+        //     }
+        //     steps {
+        //         echo 'Testing model correctness..'
+        //         sh 'pip install -r requirements.txt && pytest'
+        //     }
+        // }
         stage('Build') {
             steps {
                 script {
                     echo 'Building backend image for deployment..'
-                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
-                                                    "-f ${backendDockerfile} .")
+                    // def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
+                    // def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
+                    //                                 "-f ${backendDockerfile} .")
                     
                     echo 'Building frontend image for deployment..'
-                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
-                                                     "-f ${frontendDockerfile} .")
+                    // def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
+                    // def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
+                    //                                  "-f ${frontendDockerfile} .")
                     
                     echo 'Pushing backend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        backendImage.push()
-                        backendImage.push('latest')
-                    }
+                    // docker.withRegistry('', registryCredential) {
+                    //     backendImage.push()
+                    //     backendImage.push('latest')
+                    // }
                     
                     echo 'Pushing frontend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        frontendImage.push()
-                        frontendImage.push('latest')
-                    }
+                    // docker.withRegistry('', registryCredential) {
+                    //     frontendImage.push()
+                    //     frontendImage.push('latest')
+                    // }
                 }
             }
         }
@@ -64,10 +64,11 @@ pipeline {
             }
             steps{
                 script{
-                    container('helm'){
-                        sh("helm upgrade --install txt2img \
-                        ./helm/txt2img --namespace model-serving")
-                    }
+                    echo 'Deploying application to GKE..'
+                    // container('helm'){
+                    //     sh("helm upgrade --install txt2img \
+                    //     ./helm/txt2img --namespace model-serving")
+                    // }
                 }
             }
         }

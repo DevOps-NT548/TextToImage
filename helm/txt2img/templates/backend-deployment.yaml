@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: txt2img-backend
+  namespace: model-serving
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: txt2img-backend
+  template:
+    metadata:
+      labels:
+        app: txt2img-backend
+    spec:
+      containers:
+      - name: backend
+        image: {{ .Values.image.repository }}/txt2img_backend:{{ .Values.image.tag }}
+        ports:
+        - containerPort: {{ .Values.service.backendPort }}
+        envFrom:
+        - configMapRef:
+            name: txt2img-config
+        - secretRef:
+            name: txt2img-secret

@@ -1,0 +1,2 @@
+[servers]
+34.71.207.252 ansible_ssh_private_key_file=/home/kevvn/.ssh/id_rsa

@@ -1,0 +1,14 @@
+replicaCount: 2
+
+image:
+  repository: liuchangming
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  frontendPort: 3000
+  backendPort: 8000
+
+env:
+  NEXT_PUBLIC_BACKEND_URL: ""  # Will be set by update_backend_ip script

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: txt2img-config
+  namespace: model-serving
+data:
+  CREDENTIAL_JSON_FILE_NAME: "/app/namsee_key.json"
+  STORAGE_BUCKET_NAME: "img_bucket04"
+  SECRET_KEY: ""
+  DATABASE_ENGINE: "django.db.backends.postgresql"
+  DATABASE_NAME: ""
+  DATABASE_USER: ""
+  DATABASE_PASSWORD: ""
+  DATABASE_HOST: ""
+  DATABASE_PORT: "5432"

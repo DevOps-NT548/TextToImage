@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  txt2img_frontend:
+    build:
+      context: ../..
+      dockerfile: deployment/model_predictor/Frontend_Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_CREDENTIAL_JSON_FILE_NAME=/app/namsee_key.json
+      - NEXT_PUBLIC_STORAGE_BUCKET_NAME=${STORAGE_BUCKET_NAME}
+      - NEXT_PUBLIC_SECRET_KEY=${SECRET_KEY}
+      - NEXT_PUBLIC_DATABASE_ENGINE=${DATABASE_ENGINE}
+      - NEXT_PUBLIC_DATABASE_NAME=${DATABASE_NAME}
+      - NEXT_PUBLIC_DATABASE_USER=${DATABASE_USER}
+      - NEXT_PUBLIC_DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - NEXT_PUBLIC_DATABASE_HOST=${DATABASE_HOST}
+    depends_on:
+      - txt2img_backend
+    volumes: 
+      - ./Frontend/:/txt2img-app-frontend
+    command: npm run dev
+    network_mode: "host"
+
+  txt2img_backend:
+    build:
+      context: ../..
+      dockerfile: deployment/model_predictor/Backend_Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - CREDENTIAL_JSON_FILE_NAME=/app/namsee_key.json
+      - STORAGE_BUCKET_NAME=${STORAGE_BUCKET_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_ENGINE=${DATABASE_ENGINE}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+    volumes:
+      - ../../namsee_key.json:/app/namsee_key.json
+    network_mode: "host"

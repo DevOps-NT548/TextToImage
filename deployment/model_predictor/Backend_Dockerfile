@@ -1,0 +1,26 @@
+FROM python:3.9
+
+WORKDIR /app
+
+# Copy Backend directory
+COPY Backend ./Backend
+
+# Install dependencies
+RUN pip install -r Backend/requirements.txt --no-cache-dir
+RUN pip install diffusers --no-cache-dir
+RUN pip install --upgrade-strategy eager optimum["openvino"] --no-cache-dir
+
+# Copy Model directory
+COPY Model ./Model
+
+# Ensure setup.sh is copied and executable
+COPY Backend/setup.sh ./Backend/setup.sh
+RUN chmod +x ./Backend/setup.sh
+COPY namsee_key.json /app/
+
+WORKDIR /app/Backend
+
+EXPOSE 8000
+
+# Use absolute path to setup.sh
+CMD ["/bin/bash", "/app/Backend/setup.sh"]

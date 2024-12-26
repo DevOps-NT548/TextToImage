@@ -1,6 +1,17 @@
 pipeline {
     agent any
 
+    // environment {
+    //     CREDENTIAL_JSON_FILE_NAME = credentials('CREDENTIAL_JSON_FILE_NAME')
+    //     STORAGE_BUCKET_NAME = credentials('STORAGE_BUCKET_NAME')
+    //     SECRET_KEY = credentials('SECRET_KEY')
+    //     DATABASE_NAME = credentials('DATABASE_NAME')
+    //     DATABASE_USER = credentials('DATABASE_USER')
+    //     DATABASE_PASSWORD = credentials('DATABASE_PASSWORD')
+    //     DATABASE_HOST = credentials('DATABASE_HOST')
+    //     DATABASE_PORT = credentials('DATABASE_PORT')
+    // }
+
     options{
         // Max number of build logs to keep and days to keep
         buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '5'))
@@ -65,10 +76,25 @@ pipeline {
             steps{
                 script{
                     echo 'Deploying application to GKE..'
-                    // container('helm'){
-                    //     sh("helm upgrade --install txt2img \
-                    //     ./helm/txt2img --namespace model-serving")
+                    // container('helm') {
+                    //     sh """
+                    //     helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+                    //     --set CREDENTIAL_JSON_FILE_NAME=${env.CREDENTIAL_JSON_FILE_NAME} \
+                    //     --set STORAGE_BUCKET_NAME=${env.STORAGE_BUCKET_NAME} \
+                    //     --set SECRET_KEY=${env.SECRET_KEY} \
+                    //     --set DATABASE_NAME=${env.DATABASE_NAME} \
+                    //     --set DATABASE_USER=${env.DATABASE_USER} \
+                    //     --set DATABASE_PASSWORD=${env.DATABASE_PASSWORD} \
+                    //     --set DATABASE_HOST=${env.DATABASE_HOST} \
+                    //     --set DATABASE_PORT=${env.DATABASE_PORT}
+                    //     """
                     // }
+                    // echo 'Running update_backend_ip_on_k8s.sh script..'
+                    // sh """
+                    // cd scripts
+                    // chmod +x update_backend_ip_on_k8s.sh
+                    // ./update_backend_ip_on_k8s.sh
+                    // """
                 }
             }
         }

@@ -9,8 +9,8 @@ pipeline {
     }
 
     environment{
-        registry = 'kevvn/txt2img'
-        registryCredential = 'dockerhub'      
+        registry = 'liuchangming/txt2img'
+        registryCredential = 'Dockerhub-Access-Token'      
     }
 
     stages {
@@ -28,14 +28,26 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    def dockerfile = 'Dockerfile'
-                    echo 'Building image for deployment..'
-                    dockerImage = docker.build(registry + ":$BUILD_NUMBER", 
-                                             "-f ./deployment/model_predictor/Dockerfile .") 
-                    echo 'Pushing image to dockerhub..'
-                    docker.withRegistry( '', registryCredential ) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                    echo 'Building backend image for deployment..'
+                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
+                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
+                                                    "-f ${backendDockerfile} .")
+                    
+                    echo 'Building frontend image for deployment..'
+                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
+                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
+                                                     "-f ${frontendDockerfile} .")
+                    
+                    echo 'Pushing backend image to dockerhub..'
+                    docker.withRegistry('', registryCredential) {
+                        backendImage.push()
+                        backendImage.push('latest')
+                    }
+                    
+                    echo 'Pushing frontend image to dockerhub..'
+                    docker.withRegistry('', registryCredential) {
+                        frontendImage.push()
+                        frontendImage.push('latest')
                     }
                 }
             }
@@ -44,8 +56,8 @@ pipeline {
             agent{
                 kubernetes{
                     containerTemplate{
-                        name 'helm' // name of the container to be used for hel, upgrade
-                        image 'kevvn/jenkins:lts' // the image containing helm
+                        name 'helm' // name of the container to be used for helm upgrade
+                        image 'liuchangming/jenkins:lts' // the image containing helm
                         alwaysPullImage true // Always pull image in case of using the same tag
                      }
                 }
@@ -53,8 +65,8 @@ pipeline {
             steps{
                 script{
                     container('helm'){
-                        sh("helm upgrade --install disaster-text-classifier \
-                        ./helm/disaster_chart --namespace model-serving")
+                        sh("helm upgrade --install txt2img \
+                        ./helm/txt2img --namespace model-serving")
                     }
                 }
             }

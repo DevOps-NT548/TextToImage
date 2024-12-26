@@ -1,2 +1,2 @@
-docker build -t kevvn/jenkins:lts . \
-&& docker push kevvn/jenkins:lts
+docker build -t liuchangming/jenkins:lts . \
+&& docker push liuchangming/jenkins:lts

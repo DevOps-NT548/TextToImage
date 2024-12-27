@@ -61,7 +61,7 @@ pipeline {
                         sh "cp \$GCP_CREDENTIALS_FILE namsee_key.json"
                         // ... use namsee_key.json ...
                         sh 'rm namsee_key.json'
-                    }
+                    } 
                     // Write credentials to temp files
                     writeFile file: 'namsee_key.json', text: GCP_CREDENTIALS
 

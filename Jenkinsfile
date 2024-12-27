@@ -11,7 +11,7 @@ pipeline {
     environment{
         registry = 'liuchangming/txt2img'
         registryCredential = 'Dockerhub-Access-Token'      
-        GCP_CREDENTIALS = credentials('namsee_key_credentials')
+        GCP_CREDENTIALS = credentials('gcp-service-account')
     }
 
     stages {

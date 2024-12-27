@@ -57,10 +57,13 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "cp \$GCP_CREDENTIALS namsee_key.json"
+                    withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_CREDENTIALS_FILE')]) {
+                        sh "cp \$GCP_CREDENTIALS_FILE namsee_key.json"
+                        // ... use namsee_key.json ...
+                        sh 'rm namsee_key.json'
+                    }
                     // Write credentials to temp files
                     writeFile file: 'namsee_key.json', text: GCP_CREDENTIALS
-                    writeFile file: '.env', text: ENV_FILE
 
                     // Build images with secrets
                     def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'

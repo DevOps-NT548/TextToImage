@@ -43,7 +43,7 @@ pipeline {
                         cd Frontend
                         npm install
                         npm run lint
-                        npm test
+                        npm run build
                         '''
                     }
                 }

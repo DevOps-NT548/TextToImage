@@ -83,6 +83,7 @@ pipeline {
                     }
                 }
             }
+        }
         stage('Deploy application to Google Kubernestes Engine') {
             agent{
                 kubernetes{

@@ -57,6 +57,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    sh "cp \$GCP_CREDENTIALS namsee_key.json"
                     // Write credentials to temp files
                     writeFile file: 'namsee_key.json', text: GCP_CREDENTIALS
                     writeFile file: '.env', text: ENV_FILE
@@ -73,7 +74,7 @@ pipeline {
                                                 "-f ${frontendDockerfile} .")
 
                     // Clean up sensitive files
-                    sh 'rm -f namsee_key.json .env'
+                    sh 'rm -f namsee_key.json'
                     
                     // Push images
                     docker.withRegistry('', registryCredential) {

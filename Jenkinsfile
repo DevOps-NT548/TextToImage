@@ -59,27 +59,12 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_CREDENTIALS_FILE')]) {
                         sh "cp \$GCP_CREDENTIALS_FILE namsee_key.json"
-                        // Build images with secrets
-                        def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                        def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER",
-                                                    "--secret id=namsee_key,src=namsee_key.json " +
-                                                    "-f ${backendDockerfile} .")
-                        
-                        def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                        def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER",
-                                                    "--secret id=namsee_key,src=namsee_key.json " +
-                                                    "-f ${frontendDockerfile} .")
-
+                        // Build images using Makefile
+                        sh 'make build_app_image'
+                        // Push images using Makefile
+                        sh 'make register_app_image'
                         // Clean up sensitive files
                         sh 'rm -f namsee_key.json'
-                        
-                        // Push images
-                        docker.withRegistry('', registryCredential) {
-                            backendImage.push()
-                            backendImage.push('latest')
-                            frontendImage.push()
-                            frontendImage.push('latest')
-                        }
                     }
                 }
             }
@@ -115,24 +100,15 @@ pipeline {
         }
     }
 
-    // post {
-    //     always {
-    //         cleanWs(
-    //             cleanWhenNotBuilt: true,
-    //             deleteDirs: true,
-    //             disableDeferredWipeout: true,
-    //             patterns: [
-    //                 [pattern: '**/.git/**', type: 'EXCLUDE'],
-    //                 [pattern: '**/node_modules/**', type: 'EXCLUDE']
-    //             ]
-    //         )
-            
-    //         sh '''
-    //             docker container prune -f
-    //             docker image prune -af
-    //             docker volume prune -f
-    //             docker network prune -f
-    //         '''
-    //     }
-    // }
+    post {
+        always {
+            cleanWs()
+            sh '''
+                docker container prune -f
+                docker image prune -af
+                docker volume prune -f
+                docker network prune -f
+            '''
+        }
+    }
 }

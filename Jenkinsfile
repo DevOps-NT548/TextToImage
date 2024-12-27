@@ -91,16 +91,16 @@ pipeline {
                     echo 'Deploying application to GKE..'
                     container('helm') {
                         echo 'Deploying the new images to GKE..'
-                        sh ("
-                        helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                        ")
+                        sh '''
+                        helm upgrade --install txt2img ./helm/txt2img --namespace model-serving
+                        '''
 
                         echo 'Running update_backend_ip_on_k8s.sh script..'
-                        sh ("""
+                        sh '''
                         cd scripts
                         chmod +x update_backend_ip_on_k8s.sh
                         ./update_backend_ip_on_k8s.sh
-                        """)
+                        '''
                     }
                 }
             }

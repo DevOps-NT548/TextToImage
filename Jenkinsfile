@@ -116,24 +116,24 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            cleanWs(
-                cleanWhenNotBuilt: true,
-                deleteDirs: true,
-                disableDeferredWipeout: true,
-                patterns: [
-                    [pattern: '**/.git/**', type: 'EXCLUDE'],
-                    [pattern: '**/node_modules/**', type: 'EXCLUDE']
-                ]
-            )
+    // post {
+    //     always {
+    //         cleanWs(
+    //             cleanWhenNotBuilt: true,
+    //             deleteDirs: true,
+    //             disableDeferredWipeout: true,
+    //             patterns: [
+    //                 [pattern: '**/.git/**', type: 'EXCLUDE'],
+    //                 [pattern: '**/node_modules/**', type: 'EXCLUDE']
+    //             ]
+    //         )
             
-            sh '''
-                docker container prune -f
-                docker image prune -af
-                docker volume prune -f
-                docker network prune -f
-            '''
-        }
-    }
+    //         sh '''
+    //             docker container prune -f
+    //             docker image prune -af
+    //             docker volume prune -f
+    //             docker network prune -f
+    //         '''
+    //     }
+    // }
 }

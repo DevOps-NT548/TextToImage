@@ -11,7 +11,7 @@ pipeline {
     environment{
         registry = 'liuchangming/txt2img'
         registryCredential = 'Dockerhub-Access-Token'      
-        GCP_CREDENTIALS = credentials('gcp-service-account')
+        //GCP_CREDENTIALS = credentials('gcp-service-account')
     }
 
     stages {
@@ -59,36 +59,30 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_CREDENTIALS_FILE')]) {
                         sh "cp \$GCP_CREDENTIALS_FILE namsee_key.json"
-                        // ... use namsee_key.json ...
-                        sh 'rm namsee_key.json'
-                    } 
-                    // Write credentials to temp files
-                    writeFile file: 'namsee_key.json', text: GCP_CREDENTIALS
+                        // Build images with secrets
+                        def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
+                        def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER",
+                                                    "--secret id=namsee_key,src=namsee_key.json " +
+                                                    "-f ${backendDockerfile} .")
+                        
+                        def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
+                        def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER",
+                                                    "--secret id=namsee_key,src=namsee_key.json " +
+                                                    "-f ${frontendDockerfile} .")
 
-                    // Build images with secrets
-                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER",
-                                                "--secret id=namsee_key,src=namsee_key.json " +
-                                                "-f ${backendDockerfile} .")
-                    
-                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile' 
-                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER",
-                                                "--secret id=namsee_key,src=namsee_key.json " +
-                                                "-f ${frontendDockerfile} .")
-
-                    // Clean up sensitive files
-                    sh 'rm -f namsee_key.json'
-                    
-                    // Push images
-                    docker.withRegistry('', registryCredential) {
-                        backendImage.push()
-                        backendImage.push('latest')
-                        frontendImage.push()
-                        frontendImage.push('latest')
+                        // Clean up sensitive files
+                        sh 'rm -f namsee_key.json'
+                        
+                        // Push images
+                        docker.withRegistry('', registryCredential) {
+                            backendImage.push()
+                            backendImage.push('latest')
+                            frontendImage.push()
+                            frontendImage.push('latest')
+                        }
                     }
                 }
             }
-        }
         stage('Deploy application to Google Kubernestes Engine') {
             agent{
                 kubernetes{

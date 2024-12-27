@@ -11,6 +11,7 @@ pipeline {
     environment{
         registry = 'liuchangming/txt2img'
         registryCredential = 'Dockerhub-Access-Token'      
+        GCP_CREDENTIALS = credentials('namsee_key_credentials')
     }
 
     stages {
@@ -56,24 +57,28 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    echo 'Building backend image for deployment..'
+                    // Write credentials to temp files
+                    writeFile file: 'namsee_key.json', text: GCP_CREDENTIALS
+                    writeFile file: '.env', text: ENV_FILE
+
+                    // Build images with secrets
                     def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
-                                                    "-f ${backendDockerfile} .")
+                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER",
+                                                "--secret id=namsee_key,src=namsee_key.json " +
+                                                "-f ${backendDockerfile} .")
                     
-                    echo 'Building frontend image for deployment..'
-                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
-                                                     "-f ${frontendDockerfile} .")
+                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile' 
+                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER",
+                                                "--secret id=namsee_key,src=namsee_key.json " +
+                                                "-f ${frontendDockerfile} .")
+
+                    // Clean up sensitive files
+                    sh 'rm -f namsee_key.json .env'
                     
-                    echo 'Pushing backend image to dockerhub..'
+                    // Push images
                     docker.withRegistry('', registryCredential) {
                         backendImage.push()
                         backendImage.push('latest')
-                    }
-                    
-                    echo 'Pushing frontend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
                         frontendImage.push()
                         frontendImage.push('latest')
                     }
@@ -108,6 +113,27 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs(
+                cleanWhenNotBuilt: true,
+                deleteDirs: true,
+                disableDeferredWipeout: true,
+                patterns: [
+                    [pattern: '**/.git/**', type: 'EXCLUDE'],
+                    [pattern: '**/node_modules/**', type: 'EXCLUDE']
+                ]
+            )
+            
+            sh '''
+                docker container prune -f
+                docker image prune -af
+                docker volume prune -f
+                docker network prune -f
+            '''
         }
     }
 }

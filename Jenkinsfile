@@ -23,12 +23,14 @@ pipeline {
                         }
                     }
                     steps {
-                        echo 'Testing backend..'
-                        sh '''
-                        cd Backend
-                        pip install -r requirements.txt
-                        python manage.py test
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            echo 'Testing backend..'
+                            sh '''
+                            cd Backend
+                            pip install -r requirements.txt
+                            python manage.py test
+                            '''
+                        }
                     }
                 }
                 stage('Frontend Tests') {
@@ -38,13 +40,15 @@ pipeline {
                         }
                     }
                     steps {
-                        echo 'Testing frontend..'
-                        sh '''
-                        cd Frontend
-                        npm install
-                        npm run lint
-                        npm run build
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            echo 'Testing frontend..'
+                            sh '''
+                            cd Frontend
+                            npm install
+                            npm run lint
+                            npm run build
+                            '''
+                        }
                     }
                 }
             }

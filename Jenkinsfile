@@ -10,7 +10,7 @@ pipeline {
 
     environment {
         registry = 'liuchangming/txt2img'
-        registryCredential = 'Dockerhub-Access-Token'
+        registryCredential = 'Docker-Access-Token'
         envCredential = 'env-variables'
         keyCredential = 'namsee_key'
     }

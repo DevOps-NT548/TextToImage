@@ -31,10 +31,17 @@ pipeline {
                             file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
                         ]) {
                             sh '''
+                            # Debugging: Print the environment variables
+                            echo "ENV_VARS: $ENV_VARS"
+                            echo "JSON_KEY_PATH: $JSON_KEY_PATH"
+
                             # Write the .env file
                             echo "$ENV_VARS" > .env
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
                             export $(cat .env | xargs)
+
+                            # Debugging: Print the .env file content
+                            cat .env
 
                             # Run the backend tests
                             cd Backend

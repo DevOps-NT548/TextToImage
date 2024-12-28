@@ -13,3 +13,6 @@ matplotlib
 uvicorn
 cloud-sql-python-connector
 optimum
+diffusers
+optimum["openvino"]
+optimum.intel

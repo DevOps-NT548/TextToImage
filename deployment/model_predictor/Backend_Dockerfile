@@ -7,8 +7,6 @@ COPY Backend ./Backend
 
 # Install dependencies
 RUN pip install -r Backend/requirements.txt --no-cache-dir
-RUN pip install diffusers --no-cache-dir
-RUN pip install --upgrade-strategy eager optimum["openvino"] --no-cache-dir
 
 # Copy Model directory
 COPY Model ./Model

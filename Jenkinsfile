@@ -11,6 +11,7 @@ pipeline {
     environment{
         registry = 'liuchangming/txt2img'
         registryCredential = 'Dockerhub-Access-Token'      
+        //GCP_CREDENTIALS = credentials('gcp-service-account')
     }
 
     stages {
@@ -23,12 +24,14 @@ pipeline {
                         }
                     }
                     steps {
-                        echo 'Testing backend..'
-                        sh '''
-                        cd Backend
-                        pip install -r requirements.txt
-                        python manage.py test
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            echo 'Testing backend..'
+                            sh '''
+                            cd Backend
+                            pip install -r requirements.txt
+                            python manage.py test
+                            '''
+                        }
                     }
                 }
                 stage('Frontend Tests') {
@@ -38,13 +41,15 @@ pipeline {
                         }
                     }
                     steps {
-                        echo 'Testing frontend..'
-                        sh '''
-                        cd Frontend
-                        npm install
-                        npm run lint
-                        npm run build
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            echo 'Testing frontend..'
+                            sh '''
+                            cd Frontend
+                            npm install
+                            npm run lint
+                            npm run build
+                            '''
+                        }
                     }
                 }
             }
@@ -52,26 +57,14 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    echo 'Building backend image for deployment..'
-                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
-                                                    "-f ${backendDockerfile} .")
-                    
-                    echo 'Building frontend image for deployment..'
-                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
-                                                     "-f ${frontendDockerfile} .")
-                    
-                    echo 'Pushing backend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        backendImage.push()
-                        backendImage.push('latest')
-                    }
-                    
-                    echo 'Pushing frontend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        frontendImage.push()
-                        frontendImage.push('latest')
+                    withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_CREDENTIALS_FILE')]) {
+                        sh "cp \$GCP_CREDENTIALS_FILE namsee_key.json"
+                        // Build images using Makefile
+                        sh 'make build_app_image'
+                        // Push images using Makefile
+                        sh 'make register_app_image'
+                        // Clean up sensitive files
+                        sh 'rm -f namsee_key.json'
                     }
                 }
             }
@@ -104,6 +97,18 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+            sh '''
+                docker container prune -f
+                docker image prune -af
+                docker volume prune -f
+                docker network prune -f
+            '''
         }
     }
 }

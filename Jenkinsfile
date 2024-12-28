@@ -151,6 +151,7 @@ pipeline {
                 docker image prune -af
                 docker volume prune -f
                 docker network prune -f
+                docker system prune -f
             '''
         }
     }

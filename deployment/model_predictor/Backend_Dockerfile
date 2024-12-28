@@ -16,7 +16,6 @@ COPY Model ./Model
 # Ensure setup.sh is copied and executable
 COPY Backend/setup.sh ./Backend/setup.sh
 RUN chmod +x ./Backend/setup.sh
-COPY namsee_key.json /app/
 
 WORKDIR /app/Backend
 

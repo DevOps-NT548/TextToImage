@@ -10,7 +10,6 @@ RUN npm install
 
 # Copy app files
 COPY Frontend/ ./
-COPY namsee_key.json /app/
 
 # Expose port
 EXPOSE 3000

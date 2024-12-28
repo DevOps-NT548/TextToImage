@@ -92,11 +92,26 @@ pipeline {
         stage('Deploy application to Google Kubernetes Engine') {
             agent {
                 kubernetes {
-                    containerTemplate {
-                        name 'helm' // name of the container to be used for helm upgrade
-                        image 'liuchangming/jenkins:lts' // the image containing helm
-                        alwaysPullImage true // Always pull image in case of using the same tag
-                    }
+                    yaml '''
+                        apiVersion: v1
+                        kind: Pod
+                        metadata:
+                        namespace: model-serving
+                        spec:
+                        containers:
+                        - name: helm
+                            image: alpine/helm:3.11.1
+                            command:
+                            - cat
+                            tty: true
+                            resources:
+                            requests:
+                                memory: "256Mi"
+                                cpu: "100m"
+                            limits:
+                                memory: "512Mi"
+                                cpu: "500m"
+                    '''
                 }
             }
             environment {
@@ -123,12 +138,13 @@ pipeline {
                             '''
 
                             // Deploy with Helm
-                            echo 'Deploying the new images to GKE..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set-file envFile=/tmp/.env \
-                            --set-file credentialJsonFile=${CREDENTIAL_JSON_FILE_NAME}
-                            '''
+                            helm upgrade --install txt2img ./helm/txt2img \
+                            --namespace model-serving \
+                            --create-namespace \
+                            --set environment=$ENV_VARIABLES \
+                            --set credentials.json=${CREDENTIAL_JSON_FILE_NAME}
+                            
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'
                             sh '''

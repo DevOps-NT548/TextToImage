@@ -7,7 +7,7 @@
       machine_type: e2-highmem-4
       # Refer to https://cloud.google.com/compute/docs/images/os-details#ubuntu_lts
       # or use the command `gcloud compute images list --project=ubuntu-os-cloud`
-      zone: us-central1-a
+      zone: us-central1-b
       project: linen-walker-444306-k9 
       # The service account is needed to create the resources
       auth_kind: serviceaccount

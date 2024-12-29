@@ -8,8 +8,18 @@ BACKEND_IP=$(kubectl get svc txt2img-backend -n ${NAMESPACE} -o jsonpath='{.stat
 echo "Backend IP: ${BACKEND_IP}"
 
 # Update the secret with the backend IP
-kubectl create configmap txt2img-secret \
+kubectl create secret generic txt2img-credentials \
   --namespace=${NAMESPACE} \
+  --from-file=namsee_key.json=/path/to/namsee_key.json \
+  --from-literal=CREDENTIAL_JSON_FILE_NAME="app/namsee_key.json" \
+  --from-literal=STORAGE_BUCKET_NAME="${STORAGE_BUCKET_NAME}" \
+  --from-literal=SECRET_KEY="${SECRET_KEY}" \
+  --from-literal=DATABASE_ENGINE="${DATABASE_ENGINE}" \
+  --from-literal=DATABASE_NAME="${DATABASE_NAME}" \
+  --from-literal=DATABASE_USER="${DATABASE_USER}" \
+  --from-literal=DATABASE_PASSWORD="${DATABASE_PASSWORD}" \
+  --from-literal=DATABASE_HOST="${DATABASE_HOST}" \
+  --from-literal=DATABASE_PORT="${DATABASE_PORT}" \
   --from-literal=NEXT_PUBLIC_BACKEND_URL="http://${BACKEND_IP}:8000" \
   --dry-run=client -o yaml | kubectl apply -n ${NAMESPACE} -f -
 

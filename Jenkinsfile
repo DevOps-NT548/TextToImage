@@ -126,7 +126,7 @@ spec:
                             kubectl create secret generic txt2img-credentials \
                               --namespace=model-serving \
                               --from-file=namsee_key.json=$JSON_KEY_PATH \
-                              --from-literal=CREDENTIAL_JSON_FILE_NAME="app/credentials/namsee_key.json" \
+                              --from-literal=CREDENTIAL_JSON_FILE_NAME="/app/credentials/namsee_key.json" \
                               --from-literal=STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
                               --from-literal=SECRET_KEY="$SECRET_KEY" \
                               --from-literal=DATABASE_ENGINE="$DATABASE_ENGINE" \
@@ -138,7 +138,7 @@ spec:
                               --dry-run=client -o yaml | kubectl apply -n model-serving -f -
 
                             helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set env.CREDENTIAL_JSON_FILE_NAME="app/credentials/namsee_key.json" \
+                            --set env.CREDENTIAL_JSON_FILE_NAME="/app/credentials/namsee_key.json" \
                             --set env.STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
                             --set env.SECRET_KEY="$SECRET_KEY" \
                             --set env.DATABASE_ENGINE="$DATABASE_ENGINE" \

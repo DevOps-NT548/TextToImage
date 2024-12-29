@@ -18,14 +18,14 @@ spec:
         image: {{ .Values.image.repository }}/txt2img_backend:{{ .Values.image.tag }}
         ports:
         - containerPort: {{ .Values.service.backendPort }}
+        volumeMounts:
+          - name: json-key-volume
+            mountPath: /etc/configs
+            readOnly: true
         envFrom:
         - configMapRef:
             name: txt2img-config
-        volumeMounts:
-          - name: json-key-volume
-            mountPath: /etc/secrets
-            readOnly: true
       volumes:
         - name: json-key-volume
-          secret:
-            secretName: json-key-secret
+          configMap:
+            name: json-key-config

@@ -134,11 +134,11 @@ spec:
                             // Deploy with Helm
                             sh '''
                             helm upgrade --install txt2img ./helm/txt2img \
-                            --debug \
                             --namespace model-serving \
                             --create-namespace \
-                            --set "environment=$ENV_VARIABLES" \
-                            --set "credentials.json=${CREDENTIAL_JSON_FILE_NAME}"
+                            --set-file "credentials.json=${JSON_KEY_PATH}" \
+                            --set "credentials.envVariables=${ENV_VARIABLES}" \
+                            --debug
                             '''
                             
                             echo 'Running update_backend_ip_on_k8s.sh script..'

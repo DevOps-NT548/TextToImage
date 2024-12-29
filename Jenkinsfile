@@ -127,19 +127,22 @@ spec:
                             sh '''
                             echo "$ENV_VARIABLES" > .env
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
-                            '''
-
-                            // Convert .env into Helm --set arguments
-                            echo 'Converting .env to Helm --set arguments..'
-                            sh '''
-                            HELM_SET_ARGS=$(awk -F= '{print "--set " $1 "=" $2}' .env | xargs)
-                            echo $HELM_SET_ARGS > /helm_args.txt
+                            export $(cat .env | xargs)
                             '''
 
                             // Deploy with Helm using the generated args
                             echo 'Deploying with Helm..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving $(cat /helm_args.txt)
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+                            --set CREDENTIAL_JSON_FILE_NAME="$CREDENTIAL_JSON_FILE_NAME" \
+                            --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
+                            --set SECRET_KEY="$SECRET_KEY" \
+                            --set DATABASE_ENGINE="$DATABASE_ENGINE" \
+                            --set DATABASE_NAME="$DATABASE_NAME" \
+                            --set DATABASE_USER="$DATABASE_USER" \
+                            --set DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+                            --set DATABASE_HOST="$DATABASE_HOST" \
+                            --set DATABASE_PORT="$DATABASE_PORT"
                             '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'

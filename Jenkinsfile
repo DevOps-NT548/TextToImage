@@ -98,19 +98,19 @@ pipeline {
             agent {
                 kubernetes {
                     yaml '''
-                    apiVersion: v1
-                    kind: Pod
-                    metadata:
-                    namespace: model-serving
-                    spec:
-                    serviceAccountName: jenkins-sa
-                    containers:
-                    - name: helm
-                        image: dtzar/helm-kubectl:3.11.1
-                        command:
-                        - cat
-                        tty: true
-                    '''
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: model-serving
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+  - name: helm
+    image: dtzar/helm-kubectl:3.11.1
+    command:
+    - cat
+    tty: true
+'''
                 }
             }
             environment {

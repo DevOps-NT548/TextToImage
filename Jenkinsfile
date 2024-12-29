@@ -97,11 +97,20 @@ pipeline {
         stage('Deploy application to Google Kubernetes Engine') {
             agent {
                 kubernetes {
-                    containerTemplate {
-                        name 'helm' // name of the container to be used for helm upgrade
-                        image 'liuchangming/jenkins:lts' // the image containing helm
-                        alwaysPullImage true // Always pull image in case of using the same tag
-                    }
+                    yaml '''
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                    namespace: model-serving
+                    spec:
+                    serviceAccountName: jenkins-sa
+                    containers:
+                    - name: helm
+                        image: dtzar/helm-kubectl:3.11.1
+                        command:
+                        - cat
+                        tty: true
+                    '''
                 }
             }
             environment {

@@ -11,6 +11,16 @@ service:
   backendPort: 8000
 
 env:
+  CREDENTIAL_JSON_FILE_NAME: ""
+  STORAGE_BUCKET_NAME: ""
+  SECRET_KEY: ""
+  DATABASE_ENGINE: ""
+  DATABASE_NAME: ""
+  DATABASE_USER: ""
+  DATABASE_PASSWORD: ""
+  DATABASE_HOST: ""
+  DATABASE_PORT: ""
+  NEXT_PUBLIC_BACKEND_URL: ""
   NEXT_PUBLIC_BACKEND_URL: ""  # Will be set by update_backend_ip script
 
 credentials:

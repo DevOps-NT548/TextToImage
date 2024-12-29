@@ -135,7 +135,7 @@ spec:
 
 
                             helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set CREDENTIAL_JSON_FILE_NAME="/etc/credentials/CREDENTIAL_JSON_FILE_NAME" \
+                            --set CREDENTIAL_JSON_FILE_NAME="just for debugging" \
                             --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
                             --set SECRET_KEY="$SECRET_KEY" \
                             --set DATABASE_ENGINE="$DATABASE_ENGINE" \

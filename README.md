@@ -30,6 +30,7 @@
       - [Launch Jenkins instance](#launch-jenkins-instance)
       - [Setup connection Jenkins to github repo](#setup-connection-jenkins-to-github-repo)
       - [Setup connection GKE to Jenkins](#setup-connection-gke-to-jenkins)
+      - [Create jenkins service account in GKE](#create-jenkins-service-account-in-gke)
     - [Continuous deployment](#continuous-deployment)
   - [Demo](#demo)
          
@@ -393,6 +394,16 @@ kubectl config view -o jsonpath='{.clusters[?(@.name == "gke_linen-walker-444306
 - Create a new credential with 'Service account from private key' option.
 
 - Use the credential you just created, then click "Test connection" to verify connection. If connection is successful, click save.
+
+##### Create jenkins service account in GKE
+
+To allow Jenkins to deploy to GKE, we need to create a service account in GKE and give it the necessary permissions.
+
+```bash
+kubectl create serviceaccount jenkins-sa -n model-serving
+kubectl apply -f jenkins_sa/role.yaml
+kubectl apply -f jenkins_sa/role_binding.yaml
+```
 
 #### Continuous deployment
 

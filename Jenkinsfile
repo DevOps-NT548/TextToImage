@@ -97,11 +97,20 @@ pipeline {
         stage('Deploy application to Google Kubernetes Engine') {
             agent {
                 kubernetes {
-                    containerTemplate {
-                        name 'helm' // name of the container to be used for helm upgrade
-                        image 'liuchangming/jenkins:lts' // the image containing helm
-                        alwaysPullImage true // Always pull image in case of using the same tag
-                    }
+                    yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: model-serving
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+  - name: helm
+    image: dtzar/helm-kubectl:3.11.1
+    command:
+    - cat
+    tty: true
+'''
                 }
             }
             environment {
@@ -124,17 +133,19 @@ pipeline {
 
                             // Copy the JSON key file to the deployment environment
                             sh '''
-                            cp $JSON_KEY_PATH ${CREDENTIAL_JSON_FILE_NAME}
+                            cp $JSON_KEY_PATH /app/namsee_key.json
                             '''
 
                             // Deploy with Helm
-                            echo 'Deploying the new images to GKE..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set-file envFile=/tmp/.env \
-                            --set-file credentialJsonFile=${CREDENTIAL_JSON_FILE_NAME}
+                            helm upgrade --install txt2img ./helm/txt2img \
+                            --namespace model-serving \
+                            --create-namespace \
+                            --set-file "credentials.json=${JSON_KEY_PATH}" \
+                            --set "credentials.envVariables=${ENV_VARIABLES}" \
+                            --debug
                             '''
-
+                            
                             echo 'Running update_backend_ip_on_k8s.sh script..'
                             sh '''
                             cd scripts

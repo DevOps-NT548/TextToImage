@@ -121,20 +121,33 @@ spec:
                             echo 'Setting up environment variables and deploying the application..'
                             sh '''
                             echo "$ENV_VARIABLES" > .env
-                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
                             export $(cat .env | xargs)
 
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
-                            --set SECRET_KEY="$SECRET_KEY" \
-                            --set DATABASE_ENGINE="$DATABASE_ENGINE" \
-                            --set DATABASE_NAME="$DATABASE_NAME" \
-                            --set DATABASE_USER="$DATABASE_USER" \
-                            --set DATABASE_PASSWORD="$DATABASE_PASSWORD" \
-                            --set DATABASE_HOST="$DATABASE_HOST" \
-                            --set DATABASE_PORT="$DATABASE_PORT"
-                            '''
+                            kubectl create secret generic txt2img-credentials \
+                              --namespace=model-serving \
+                              --from-file=namsee_key.json=$JSON_KEY_PATH \
+                              --from-literal=CREDENTIAL_JSON_FILE_NAME="app/namsee_key.json" \
+                              --from-literal=STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
+                              --from-literal=SECRET_KEY="$SECRET_KEY" \
+                              --from-literal=DATABASE_ENGINE="$DATABASE_ENGINE" \
+                              --from-literal=DATABASE_NAME="$DATABASE_NAME" \
+                              --from-literal=DATABASE_USER="$DATABASE_USER" \
+                              --from-literal=DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+                              --from-literal=DATABASE_HOST="$DATABASE_HOST" \
+                              --from-literal=DATABASE_PORT="$DATABASE_PORT" \
+                              --dry-run=client -o yaml | kubectl apply -n model-serving -f -
 
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+                            --set env.CREDENTIAL_JSON_FILE_NAME="app/namsee_key.json" \
+                            --set env.STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
+                            --set env.SECRET_KEY="$SECRET_KEY" \
+                            --set env.DATABASE_ENGINE="$DATABASE_ENGINE" \
+                            --set env.DATABASE_NAME="$DATABASE_NAME" \
+                            --set env.DATABASE_USER="$DATABASE_USER" \
+                            --set env.DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+                            --set env.DATABASE_HOST="$DATABASE_HOST" \
+                            --set env.DATABASE_PORT="$DATABASE_PORT"
+                            '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'
                             sh '''

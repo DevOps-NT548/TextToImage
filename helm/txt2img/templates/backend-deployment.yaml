@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-backend
   namespace: model-serving
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-backend

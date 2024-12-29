@@ -144,6 +144,7 @@ pipeline {
                             --create-namespace \
                             --set environment=$ENV_VARIABLES \
                             --set credentials.json=${CREDENTIAL_JSON_FILE_NAME}
+                            '''
                             
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'

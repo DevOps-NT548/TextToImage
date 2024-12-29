@@ -67,12 +67,12 @@ pipeline {
                 script {
                     echo 'Building backend image for deployment..'
                     def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:$BUILD_NUMBER", 
+                    def backendImage = docker.build("${registry}_backend:latest", 
                                                     "-f ${backendDockerfile} .")
                     
                     echo 'Building frontend image for deployment..'
                     def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    def frontendImage = docker.build("${registry}_frontend:$BUILD_NUMBER", 
+                    def frontendImage = docker.build("${registry}_frontend:latest", 
                                                      "-f ${frontendDockerfile} .")
                     
                     echo 'Pushing backend image to dockerhub..'

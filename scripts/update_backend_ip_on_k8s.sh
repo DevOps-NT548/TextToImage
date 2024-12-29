@@ -8,7 +8,7 @@ BACKEND_IP=$(kubectl get svc txt2img-backend -n ${NAMESPACE} -o jsonpath='{.stat
 echo "Backend IP: ${BACKEND_IP}"
 
 # Update the secret with the backend IP
-kubectl create secret generic txt2img-secret \
+kubectl create configmap txt2img-secret \
   --namespace=${NAMESPACE} \
   --from-literal=NEXT_PUBLIC_BACKEND_URL="http://${BACKEND_IP}:8000" \
   --dry-run=client -o yaml | kubectl apply -n ${NAMESPACE} -f -

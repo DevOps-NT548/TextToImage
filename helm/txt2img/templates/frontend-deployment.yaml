@@ -19,5 +19,5 @@ spec:
         ports:
         - containerPort: {{ .Values.service.frontendPort }}
         envFrom:
-        - secretRef:
-            name: txt2img-secret
+        - configMapRef:
+            name: txt2img-config

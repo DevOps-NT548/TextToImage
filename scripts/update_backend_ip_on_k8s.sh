@@ -10,7 +10,6 @@ echo "Backend IP: ${BACKEND_IP}"
 # Update the secret with the backend IP
 kubectl create secret generic txt2img-credentials \
   --namespace=${NAMESPACE} \
-  --from-file=namsee_key.json=/path/to/namsee_key.json \
   --from-literal=CREDENTIAL_JSON_FILE_NAME="app/namsee_key.json" \
   --from-literal=STORAGE_BUCKET_NAME="${STORAGE_BUCKET_NAME}" \
   --from-literal=SECRET_KEY="${SECRET_KEY}" \

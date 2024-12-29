@@ -388,6 +388,8 @@ kubectl config view -o jsonpath='{.clusters[?(@.name == "gke_linen-walker-444306
 
 - Paste that url into the kubernetes's URL section: https://<kubernetes's URL> (no port)
 
+- Check "Disable https certificate check"
+
 - Create a new credential with 'Service account from private key' option.
 
 - Use the credential you just created, then click "Test connection" to verify connection. If connection is successful, click save.

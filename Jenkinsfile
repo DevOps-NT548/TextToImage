@@ -86,6 +86,11 @@ pipeline {
                         frontendImage.push()
                         frontendImage.push('latest')
                     }
+
+                    // Update values.yaml with the new image tags
+                    sh """
+                    sed -i 's/tag: latest/tag: ${BUILD_NUMBER}/g' helm/values.yaml
+                    """
                 }
             }
         }

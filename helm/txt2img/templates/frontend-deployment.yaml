@@ -1,23 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: txt2img-frontend
+  name: {{ .Release.Name }}-frontend
   namespace: model-serving
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      app: txt2img-frontend
+      app: {{ .Release.Name }}-frontend
   template:
     metadata:
       labels:
-        app: txt2img-frontend
+        app: {{ .Release.Name }}-frontend
     spec:
       containers:
       - name: frontend
         image: {{ .Values.image.repository }}/txt2img_frontend:{{ .Values.image.tag }}
-        ports:
-        - containerPort: {{ .Values.service.frontendPort }}
-        envFrom:
-        - configMapRef:
-            name: txt2img-config
+        env:
+        - name: NEXT_PUBLIC_BACKEND_URL
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: NEXT_PUBLIC_BACKEND_URL

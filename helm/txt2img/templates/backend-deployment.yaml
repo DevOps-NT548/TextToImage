@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-backend
   namespace: model-serving
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: {{ .Release.Name }}-backend
@@ -16,14 +16,24 @@ spec:
       containers:
       - name: backend
         image: {{ .Values.image.repository }}/txt2img_backend:{{ .Values.image.tag }}
+        ports:
+        - containerPort: {{ .Values.service.backendPort }}
         env:
         - name: CREDENTIAL_JSON_FILE_NAME
-          value: "/app/credentials/namsee_key.json"
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: CREDENTIAL_JSON_FILE_NAME
         - name: STORAGE_BUCKET_NAME
           valueFrom:
             secretKeyRef:
               name: txt2img-credentials
               key: STORAGE_BUCKET_NAME
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: SECRET_KEY
         - name: DATABASE_ENGINE
           valueFrom:
             secretKeyRef:
@@ -54,6 +64,11 @@ spec:
             secretKeyRef:
               name: txt2img-credentials
               key: DATABASE_PORT
+        - name: NEXT_PUBLIC_BACKEND_URL
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: NEXT_PUBLIC_BACKEND_URL
         volumeMounts:
         - name: credentials-volume
           mountPath: /app/credentials

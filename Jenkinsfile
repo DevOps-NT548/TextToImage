@@ -130,13 +130,19 @@ spec:
                             sh '''
                             echo "$ENV_VARIABLES" > /tmp/.env
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> /tmp/.env
-                            export $(cat /tmp/.env | xargs)
                             '''
 
-                            // Deploy with Helm using environment variables from /tmp/.env
-                            echo 'Deploying the new images to GKE..'
+                            // Convert .env into Helm --set arguments
+                            echo 'Converting .env to Helm --set arguments..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving --set-file env=/tmp/.env
+                            HELM_SET_ARGS=$(awk -F= '{print "--set " $1 "=" $2}' /tmp/.env | xargs)
+                            echo $HELM_SET_ARGS > /tmp/helm_args.txt
+                            '''
+
+                            // Deploy with Helm using the generated args
+                            echo 'Deploying with Helm..'
+                            sh '''
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving $(cat /tmp/helm_args.txt)
                             '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'

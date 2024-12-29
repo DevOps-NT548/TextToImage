@@ -113,9 +113,6 @@ spec:
 '''
                 }
             }
-            environment {
-                CREDENTIAL_JSON_FILE_NAME = '/tmp/namsee_key.json'
-            }
             steps {
                 withCredentials([
                     string(credentialsId: 'env-variables', variable: 'ENV_VARIABLES'),
@@ -128,21 +125,21 @@ spec:
 
                             // Save the .env variables to a file
                             sh '''
-                            echo "$ENV_VARIABLES" > /tmp/.env
-                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> /tmp/.env
+                            echo "$ENV_VARIABLES" > .env
+                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
                             '''
 
                             // Convert .env into Helm --set arguments
                             echo 'Converting .env to Helm --set arguments..'
                             sh '''
-                            HELM_SET_ARGS=$(awk -F= '{print "--set " $1 "=" $2}' /tmp/.env | xargs)
-                            echo $HELM_SET_ARGS > /tmp/helm_args.txt
+                            HELM_SET_ARGS=$(awk -F= '{print "--set " $1 "=" $2}' .env | xargs)
+                            echo $HELM_SET_ARGS > /helm_args.txt
                             '''
 
                             // Deploy with Helm using the generated args
                             echo 'Deploying with Helm..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving $(cat /tmp/helm_args.txt)
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving $(cat /helm_args.txt)
                             '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'

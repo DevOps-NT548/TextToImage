@@ -5,7 +5,8 @@ metadata:
   namespace: model-serving
 subjects:
 - kind: ServiceAccount
-  name: default   # or a custom ServiceAccount if you prefer
+  name: jenkins-sa
+  namespace: model-serving
 roleRef:
   kind: Role
   name: secret-reader

@@ -19,8 +19,3 @@ kubectl delete pods -n ${NAMESPACE} -l app=txt2img-frontend
 # Wait for new pods
 echo "Waiting for frontend pods to restart..."
 kubectl rollout status deployment/txt2img-frontend -n ${NAMESPACE}
-
-# Verify the environment variable
-echo "Verifying environment variable..."
-kubectl exec -it $(kubectl get pods -n ${NAMESPACE} -l app=txt2img-frontend -o jsonpath='{.items[0].metadata.name}') \
-  -n ${NAMESPACE} -- printenv NEXT_PUBLIC_BACKEND_URL

@@ -133,10 +133,10 @@ spec:
                             export $(cat /tmp/.env | xargs)
                             '''
 
-                            // Deploy with Helm
+                            // Deploy with Helm using environment variables from /tmp/.env
                             echo 'Deploying the new images to GKE..'
                             sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving --set-file env=/tmp/.env
                             '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'

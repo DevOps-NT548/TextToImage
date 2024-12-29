@@ -90,10 +90,9 @@ pipeline {
         //     }
         // }
         stage('Deploy application to Google Kubernetes Engine') {
-            stage('Deploy application to Google Kubernetes Engine') {
-                agent {
-                    kubernetes {
-                        yaml '''
+            agent {
+                kubernetes {
+                    yaml '''
 apiVersion: v1
 kind: Pod
 metadata:
@@ -113,47 +112,46 @@ spec:
         memory: "512Mi"
         cpu: "500m"
                     '''
-                    }
                 }
-                environment {
-                    CREDENTIAL_JSON_FILE_NAME = '/tmp/namsee_key.json'
-                }
-                steps {
-                    withCredentials([
-                        string(credentialsId: 'env-variables', variable: 'ENV_VARIABLES'),
-                        file(credentialsId: 'namsee_key', variable: 'JSON_KEY_PATH')
-                    ]) {
-                        script {
-                            echo 'Deploying application to GKE..'
-                            container('helm') {
-                                echo 'Setting up environment variables..'
+            }
+            environment {
+                CREDENTIAL_JSON_FILE_NAME = '/tmp/namsee_key.json'
+            }
+            steps {
+                withCredentials([
+                    string(credentialsId: 'env-variables', variable: 'ENV_VARIABLES'),
+                    file(credentialsId: 'namsee_key', variable: 'JSON_KEY_PATH')
+                ]) {
+                    script {
+                        echo 'Deploying application to GKE..'
+                        container('helm') {
+                            echo 'Setting up environment variables..'
 
-                                // Save the .env variables to a file
-                                sh '''
-                                echo "$ENV_VARIABLES" > /tmp/.env
-                                '''
+                            // Save the .env variables to a file
+                            sh '''
+                            echo "$ENV_VARIABLES" > /tmp/.env
+                            '''
 
-                                // Copy the JSON key file to the deployment environment
-                                sh '''
-                                cp $JSON_KEY_PATH ${CREDENTIAL_JSON_FILE_NAME}
-                                '''
+                            // Copy the JSON key file to the deployment environment
+                            sh '''
+                            cp $JSON_KEY_PATH ${CREDENTIAL_JSON_FILE_NAME}
+                            '''
 
-                                // Deploy with Helm
-                                sh '''
-                                helm upgrade --install txt2img ./helm/txt2img \
-                                --namespace model-serving \
-                                --create-namespace \
-                                --set environment=$ENV_VARIABLES \
-                                --set credentials.json=${CREDENTIAL_JSON_FILE_NAME}
-                                '''
-                                
-                                echo 'Running update_backend_ip_on_k8s.sh script..'
-                                sh '''
-                                cd scripts
-                                chmod +x update_backend_ip_on_k8s.sh
-                                ./update_backend_ip_on_k8s.sh
-                                '''
-                            }
+                            // Deploy with Helm
+                            sh '''
+                            helm upgrade --install txt2img ./helm/txt2img \
+                            --namespace model-serving \
+                            --create-namespace \
+                            --set environment=$ENV_VARIABLES \
+                            --set credentials.json=${CREDENTIAL_JSON_FILE_NAME}
+                            '''
+                            
+                            echo 'Running update_backend_ip_on_k8s.sh script..'
+                            sh '''
+                            cd scripts
+                            chmod +x update_backend_ip_on_k8s.sh
+                            ./update_backend_ip_on_k8s.sh
+                            '''
                         }
                     }
                 }

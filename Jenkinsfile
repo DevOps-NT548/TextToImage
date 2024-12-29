@@ -96,21 +96,21 @@ pipeline {
                         apiVersion: v1
                         kind: Pod
                         metadata:
-                        namespace: model-serving
+                            namespace: model-serving
                         spec:
-                        containers:
-                        - name: helm
-                            image: alpine/helm:3.11.1
-                            command:
-                            - cat
-                            tty: true
-                            resources:
-                            requests:
-                                memory: "256Mi"
-                                cpu: "100m"
-                            limits:
-                                memory: "512Mi"
-                                cpu: "500m"
+                            containers:
+                            - name: helm
+                                image: alpine/helm:3.11.1
+                                command:
+                                - cat
+                                tty: true
+                                resources:
+                                    requests:
+                                        memory: "256Mi"
+                                        cpu: "100m"
+                                    limits:
+                                        memory: "512Mi"
+                                        cpu: "500m"
                     '''
                 }
             }

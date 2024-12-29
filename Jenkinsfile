@@ -134,6 +134,7 @@ spec:
                             // Deploy with Helm
                             sh '''
                             helm upgrade --install txt2img ./helm/txt2img \
+                            --debug \
                             --namespace model-serving \
                             --create-namespace \
                             --set "environment=$ENV_VARIABLES" \

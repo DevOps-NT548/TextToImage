@@ -12,3 +12,7 @@ service:
 
 env:
   NEXT_PUBLIC_BACKEND_URL: ""  # Will be set by update_backend_ip script
+
+credentials:
+  json: ""
+  envVariables: ""

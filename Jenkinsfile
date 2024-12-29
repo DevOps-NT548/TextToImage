@@ -115,8 +115,8 @@ spec:
             }
             steps {
                 withCredentials([
-                    string(credentialsId: 'env-variables', variable: 'ENV_VARIABLES'),
-                    file(credentialsId: 'namsee_key', variable: 'JSON_KEY_PATH')
+                    string(credentialsId: envCredential, variable: 'ENV_VARIABLES'),
+                    file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
                 ]) {
                     script {
                         echo 'Deploying application to GKE..'
@@ -128,8 +128,14 @@ spec:
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
                             export $(cat .env | xargs)
 
+                            # Create Kubernetes Secret for the JSON file
+                            kubectl create secret generic txt2img-credentials \
+                                --from-file=CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH \
+                                --namespace=model-serving --dry-run=client -o yaml | kubectl apply -f -
+
+
                             helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set CREDENTIAL_JSON_FILE_NAME="$CREDENTIAL_JSON_FILE_NAME" \
+                            --set CREDENTIAL_JSON_FILE_NAME="/etc/credentials/CREDENTIAL_JSON_FILE_NAME" \
                             --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
                             --set SECRET_KEY="$SECRET_KEY" \
                             --set DATABASE_ENGINE="$DATABASE_ENGINE" \

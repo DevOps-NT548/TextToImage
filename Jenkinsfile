@@ -128,7 +128,7 @@ spec:
 
                             // Copy the JSON key file to the deployment environment
                             sh '''
-                            cp $JSON_KEY_PATH ${CREDENTIAL_JSON_FILE_NAME}
+                            cp $JSON_KEY_PATH /app/namsee_key.json
                             '''
 
                             // Deploy with Helm

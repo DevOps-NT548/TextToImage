@@ -101,11 +101,11 @@ spec:
   serviceAccountName: jenkins-sa
   containers:
   - name: helm
-    image: alpine/helm:3.11.1
+    image: dtzar/helm-kubectl:3.11.1
     command:
     - cat
     tty: true
-                    '''
+'''
                 }
             }
             environment {

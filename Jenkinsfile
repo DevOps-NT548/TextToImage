@@ -121,22 +121,25 @@ spec:
                     script {
                         echo 'Deploying application to GKE..'
                         container('helm') {
-                            echo 'Setting up environment variables..'
-
-                            // Save the .env variables to a file
+                            // Set up environment variables and deploy the application
+                            echo 'Setting up environment variables and deploying the application..'
                             sh '''
                             echo "$ENV_VARIABLES" > .env
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
+                            export $(cat .env | xargs)
+
+                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+                            --set CREDENTIAL_JSON_FILE_NAME="$CREDENTIAL_JSON_FILE_NAME" \
+                            --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
+                            --set SECRET_KEY="$SECRET_KEY" \
+                            --set DATABASE_ENGINE="$DATABASE_ENGINE" \
+                            --set DATABASE_NAME="$DATABASE_NAME" \
+                            --set DATABASE_USER="$DATABASE_USER" \
+                            --set DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+                            --set DATABASE_HOST="$DATABASE_HOST" \
+                            --set DATABASE_PORT="$DATABASE_PORT"
                             '''
 
-                            // Generate Helm args from the .env file
-                            HELM_SET_ARGS=$(awk -F= '{gsub(/^[ \t]+|[ \t]+$/, "", $1); gsub(/^[ \t]+|[ \t]+$/, "", $2); print "--set " $1 "=\\"\\\"" $2 "\\""}' .env | tr '\n' ' ')
-                            echo $HELM_SET_ARGS > helm_args.txt
-
-                            // Deploy with Helm using the generated args
-                            sh '''
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving $(cat /tmp/helm_args.txt)
-                            '''
 
                             echo 'Running update_backend_ip_on_k8s.sh script..'
                             sh '''

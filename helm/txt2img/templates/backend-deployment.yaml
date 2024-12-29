@@ -21,3 +21,11 @@ spec:
         envFrom:
         - configMapRef:
             name: txt2img-config
+        volumeMounts:
+          - name: json-key-volume
+            mountPath: /etc/secrets
+            readOnly: true
+        volumes:
+          - name: json-key-volume
+            secret:
+              secretName: json-key-secret

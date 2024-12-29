@@ -159,7 +159,7 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "static_root
 # DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-CREDENTIAL_JSON = os.getenv("CREDENTIAL_JSON_FILE_NAME")
+CREDENTIAL_JSON = os.getenv("")
 STORAGE_BUCKET = os.getenv("STORAGE_BUCKET_NAME")
 
 MEDIA_ROOT = BASE_DIR / "media"

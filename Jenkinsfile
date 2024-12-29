@@ -124,13 +124,7 @@ spec:
                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
                             export $(cat .env | xargs)
 
-                            kubectl create secret generic json-key-secret \
-                            --from-file=CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH \
-                            --namespace=model-serving
-
-
                             helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set CREDENTIAL_JSON_FILE_NAME="$CREDENTIAL_JSON_FILE_NAME" \
                             --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
                             --set SECRET_KEY="$SECRET_KEY" \
                             --set DATABASE_ENGINE="$DATABASE_ENGINE" \

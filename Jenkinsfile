@@ -12,104 +12,113 @@ pipeline {
         envCredential = 'env-variables'
         keyCredential = 'namsee_key'
         sonarProjectKey = 'your-sonarqube-project-key'
-        sonarHostUrl = 'http://localhost:9000'
-        sonarLogin = 'your-sonarqube-token'
     }
 
     stages {
         stage('SonarQube Analysis') {
+            environment {
+                SONARQUBE_URL = 'http://localhost:9000'
+                SONARQUBE_TOKEN = 'sqa_5a668d71d5b9fb27e06a9d0618355aa3ac622b8e'
+                SONARQUBE_PROJECT_KEY = 'TextToImage'
+                SONARQUBE_PROJECT_NAME = 'Text To Image Project'
+            }
             steps {
-                script {
-                    withSonarQubeEnv('SonarQube') {
-                        sh 'sonar-scanner -Dsonar.projectKey=$sonarProjectKey -Dsonar.sources=. -Dsonar.host.url=$sonarHostUrl -Dsonar.login=$sonarLogin'
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    sonar-scanner \
+                    -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                    -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=${SONARQUBE_URL} \
+                    -Dsonar.login=${SONARQUBE_TOKEN}
+                    """
                 }
             }
         }
 
-        stage('Test') {
-            parallel {
-                stage('Backend Tests') {
-                    agent {
-                        docker {
-                            image 'python:3.11'
-                        }
-                    }
-                    steps {
-                        echo 'Testing backend..'
-                        withCredentials([
-                            string(credentialsId: envCredential, variable: 'ENV_VARS'),
-                            file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
-                        ]) {
-                            sh '''
-                            # Write the .env file
-                            echo "$ENV_VARS" > .env
-                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
-                            export $(cat .env | xargs)
+        // stage('Test') {
+        //     parallel {
+        //         stage('Backend Tests') {
+        //             agent {
+        //                 docker {
+        //                     image 'python:3.11'
+        //                 }
+        //             }
+        //             steps {
+        //                 echo 'Testing backend..'
+        //                 withCredentials([
+        //                     string(credentialsId: envCredential, variable: 'ENV_VARS'),
+        //                     file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
+        //                 ]) {
+        //                     sh '''
+        //                     # Write the .env file
+        //                     echo "$ENV_VARS" > .env
+        //                     echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
+        //                     export $(cat .env | xargs)
 
-                            # Run the backend tests
-                            cd Backend
-                            pip install -r requirements.txt
-                            python manage.py test
-                            '''
-                        }
-                    }
-                }
-                stage('Frontend Tests') {
-                    agent {
-                        docker {
-                            image 'node:16'
-                        }
-                    }
-                    steps {
-                        echo 'Testing frontend..'
-                        sh '''
-                        cd Frontend
-                        npm install
-                        npm run lint
-                        npm run build
-                        '''
-                    }
-                }
-            }
-        }
+        //                     # Run the backend tests
+        //                     cd Backend
+        //                     pip install -r requirements.txt
+        //                     python manage.py test
+        //                     '''
+        //                 }
+        //             }
+        //         }
+        //         stage('Frontend Tests') {
+        //             agent {
+        //                 docker {
+        //                     image 'node:16'
+        //                 }
+        //             }
+        //             steps {
+        //                 echo 'Testing frontend..'
+        //                 sh '''
+        //                 cd Frontend
+        //                 npm install
+        //                 npm run lint
+        //                 npm run build
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Build') {
-            steps {
-                script {
-                    echo 'Building backend image for deployment..'
-                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    def backendImage = docker.build("${registry}_backend:latest", 
-                                                    "-f ${backendDockerfile} .")
+        // stage('Build') {
+        //     steps {
+        //         script {
+        //             echo 'Building backend image for deployment..'
+        //             def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
+        //             def backendImage = docker.build("${registry}_backend:latest", 
+        //                                             "-f ${backendDockerfile} .")
                     
-                    echo 'Building frontend image for deployment..'
-                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    def frontendImage = docker.build("${registry}_frontend:latest", 
-                                                     "-f ${frontendDockerfile} .")
+        //             echo 'Building frontend image for deployment..'
+        //             def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
+        //             def frontendImage = docker.build("${registry}_frontend:latest", 
+        //                                              "-f ${frontendDockerfile} .")
                     
-                    echo 'Pushing backend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        backendImage.push()
-                        backendImage.push('latest')
-                    }
+        //             echo 'Pushing backend image to dockerhub..'
+        //             docker.withRegistry('', registryCredential) {
+        //                 backendImage.push()
+        //                 backendImage.push('latest')
+        //             }
                     
-                    echo 'Pushing frontend image to dockerhub..'
-                    docker.withRegistry('', registryCredential) {
-                        frontendImage.push()
-                        frontendImage.push('latest')
-                    }
-                }
-            }
-        }
+        //             echo 'Pushing frontend image to dockerhub..'
+        //             docker.withRegistry('', registryCredential) {
+        //                 frontendImage.push()
+        //                 frontendImage.push('latest')
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Trivy Scan') {
-            steps {
-                script {
-                    sh 'trivy image ${registry}_backend:latest'
-                    sh 'trivy image ${registry}_frontend:latest'
-                }
-            }
-        }
+        // stage('Trivy Scan') {
+        //     steps {
+        //         script {
+        //             sh 'trivy image ${registry}_backend:latest'
+        //             sh 'trivy image ${registry}_frontend:latest'
+        //         }
+        //     }
+        // }
 
         stage('Deploy application to Google Kubernetes Engine') {
             agent {

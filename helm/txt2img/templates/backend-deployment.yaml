@@ -56,6 +56,11 @@ spec:
             secretKeyRef:
               name: txt2img-credentials
               key: DATABASE_PORT
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: SECRET_KEY
         volumeMounts:
         - name: credentials-volume
           mountPath: /app/credentials

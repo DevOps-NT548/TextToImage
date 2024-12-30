@@ -23,10 +23,12 @@ pipeline {
                 SONARQUBE_PROJECT_NAME = 'Text To Image Project'
             }
             steps {
+                script {
+                scannerHome = tool 'SonarScanner'
+                }
                 withSonarQubeEnv('SonarQube') {
-                    def scannerHome = tool 'SonarScanner'
                     sh """
-                    sonar-scanner \
+                    ${scannerHome}/bin/sonar-scanner \
                     -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
                     -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
                     -Dsonar.sources=. \

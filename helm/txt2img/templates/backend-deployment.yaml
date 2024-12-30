@@ -1,25 +1,71 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: txt2img-backend
+  name: {{ .Release.Name }}-backend
   namespace: model-serving
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: txt2img-backend
+      app: {{ .Release.Name }}-backend
   template:
     metadata:
       labels:
-        app: txt2img-backend
+        app: {{ .Release.Name }}-backend
     spec:
       containers:
       - name: backend
         image: {{ .Values.image.repository }}/txt2img_backend:{{ .Values.image.tag }}
         ports:
         - containerPort: {{ .Values.service.backendPort }}
-        envFrom:
-        - configMapRef:
-            name: txt2img-config
-        - secretRef:
-            name: txt2img-secret
+        env:
+        - name: CREDENTIAL_JSON_FILE_NAME
+          value: "/app/credentials/namsee_key.json"
+        - name: STORAGE_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: STORAGE_BUCKET_NAME
+        - name: DATABASE_ENGINE
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_ENGINE
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_NAME
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_USER
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_PASSWORD
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: DATABASE_PORT
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: txt2img-credentials
+              key: SECRET_KEY
+        volumeMounts:
+        - name: credentials-volume
+          mountPath: /app/credentials
+          readOnly: true
+      volumes:
+      - name: credentials-volume
+        secret:
+          secretName: txt2img-credentials

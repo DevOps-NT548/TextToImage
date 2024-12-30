@@ -30,6 +30,7 @@
       - [Launch Jenkins instance](#launch-jenkins-instance)
       - [Setup connection Jenkins to github repo](#setup-connection-jenkins-to-github-repo)
       - [Setup connection GKE to Jenkins](#setup-connection-gke-to-jenkins)
+      - [Create jenkins service account in GKE](#create-jenkins-service-account-in-gke)
     - [Continuous deployment](#continuous-deployment)
   - [Demo](#demo)
          
@@ -355,7 +356,17 @@ So to log in, I use the username `admin` as the the username.
 
 ![add_webhook](images/add_webhook.png)
 
-- Configure the github credentials for connecting to Jenkins and then integrate additional DockerHub credentials into Jenkins to enable image registration. These credentials are allowed to access in github project.
+- Create a new multibranch project.
+
+- Go to that project -> configure. Under branch sources section, create a new "github" source. 
+
+- Create 2 new credentials with 'Username and password' option (one for github, one for docker)
+
+- Use the github credential for the source
+
+- Add your github repository's url to the source and then save.
+
+
 
 ![creden_jenkins](images/creden_jenkins.png)
 ![credentials](images/credentials.png)
@@ -368,20 +379,30 @@ sudo docker restart jenkins
 
 ##### Setup connection GKE to Jenkins
 
-Add the cluster certificate key at `Manage Jenkins/Clouds`. Be ensure that `Kurbenestes` plugins has been installed. 
+- Go to manage jenkins -> cloud -> create cloud.
 
-Don't forget to grant permissions to the service account which is trying to connect to our cluster by the following command:
+- Run this CLI command in your terminal to get kubernetes's API url
 
-```shell
-kubectl create clusterrolebinding model-serving-admin-binding \
-  --clusterrole=admin \
-  --serviceaccount=modelmesh-serving:default \
-  --namespace=modelmesh-serving
+```bash
+kubectl config view -o jsonpath='{.clusters[?(@.name == "gke_linen-walker-444306-k9_us-central1-a_linen-walker-444306-k9-gke")].cluster.server}'
+```
 
-kubectl create clusterrolebinding anonymous-admin-binding \
-  --clusterrole=admin \
-  --user=system:anonymous \
-  --namespace=modelmesh-serving
+- Paste that url into the kubernetes's URL section: https://<kubernetes's URL> (no port)
+
+- Check "Disable https certificate check"
+
+- Create a new credential with 'Service account from private key' option.
+
+- Use the credential you just created, then click "Test connection" to verify connection. If connection is successful, click save.
+
+##### Create jenkins service account in GKE
+
+To allow Jenkins to deploy to GKE, we need to create a service account in GKE and give it the necessary permissions.
+
+```bash
+kubectl create serviceaccount jenkins-sa -n model-serving
+kubectl apply -f jenkins_sa/role.yaml
+kubectl apply -f jenkins_sa/role_binding.yaml
 ```
 
 #### Continuous deployment

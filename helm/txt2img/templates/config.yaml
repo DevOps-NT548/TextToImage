@@ -4,12 +4,13 @@ metadata:
   name: txt2img-config
   namespace: model-serving
 data:
-  CREDENTIAL_JSON_FILE_NAME: "/app/namsee_key.json"
-  STORAGE_BUCKET_NAME: "img_bucket04"
-  SECRET_KEY: ""
-  DATABASE_ENGINE: "django.db.backends.postgresql"
-  DATABASE_NAME: ""
-  DATABASE_USER: ""
-  DATABASE_PASSWORD: ""
-  DATABASE_HOST: ""
-  DATABASE_PORT: "5432"
+  CREDENTIAL_JSON_FILE_NAME: "{{ .Values.env.CREDENTIAL_JSON_FILE_NAME }}"
+  STORAGE_BUCKET_NAME: "{{ .Values.env.STORAGE_BUCKET_NAME }}"
+  SECRET_KEY: "{{ .Values.env.SECRET_KEY }}"
+  DATABASE_ENGINE: "{{ .Values.env.DATABASE_ENGINE }}"
+  DATABASE_NAME: "{{ .Values.env.DATABASE_NAME }}"
+  DATABASE_USER: "{{ .Values.env.DATABASE_USER }}"
+  DATABASE_PASSWORD: "{{ .Values.env.DATABASE_PASSWORD }}"
+  DATABASE_HOST: "{{ .Values.env.DATABASE_HOST }}"
+  DATABASE_PORT: "{{ .Values.env.DATABASE_PORT }}"
+  NEXT_PUBLIC_BACKEND_URL: "{{ .Values.env.NEXT_PUBLIC_BACKEND_URL }}"

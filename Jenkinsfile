@@ -128,8 +128,9 @@ pipeline {
 
             steps {
                 script {
-                    // sh 'trivy image --scanners vuln ${registry}_backend:latest'
-                    // sh 'trivy image --scanners vuln ${registry}_frontend:latest'
+                    echo 'Scanning backend image for vulnerabilities..'
+                    //sh 'trivy image --scanners vuln ${registry}_backend:latest'
+                    //sh 'trivy image --scanners vuln ${registry}_frontend:latest'
                 }
             }
         }
@@ -141,15 +142,15 @@ pipeline {
 apiVersion: v1
 kind: Pod
 metadata:
-namespace: model-serving
+  namespace: model-serving
 spec:
-serviceAccountName: jenkins-sa
-containers:
-- name: helm
-    image: dtzar/helm-kubectl:3.11.1
-    command:
-    - cat
-    tty: true
+  serviceAccountName: jenkins-sa
+  containers:
+    - name: helm
+      image: dtzar/helm-kubectl:3.11.1
+      command:
+        - cat
+      tty: true
 '''
                 }
             }

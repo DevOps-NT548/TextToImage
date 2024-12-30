@@ -20,7 +20,7 @@ pipeline {
                 SONARQUBE_URL = 'http://localhost:9000'
                 SONARQUBE_TOKEN = 'sqa_5a668d71d5b9fb27e06a9d0618355aa3ac622b8e'
                 SONARQUBE_PROJECT_KEY = 'TextToImage'
-                SONARQUBE_PROJECT_NAME = 'Text To Image Project'
+                SONARQUBE_PROJECT_NAME = 'TextToImageProject'
             }
             steps {
                 script {

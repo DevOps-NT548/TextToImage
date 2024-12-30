@@ -216,20 +216,37 @@ kubectl get pods -n nginx-ingress
 
 I decided to deploy the FastAPI application container on GKE within the model-serving namespace. Two replicas will be created, corresponding to the two pods.
 
+- First, create configmap: 
+```bash
+kubectl create secret generic txt2img-credentials \
+  --from-file=namsee_key.json=/path/to/your_service_account_key.json \
+  --from-literal=CREDENTIAL_JSON_FILE_NAME="/app/credentials/your_service_account.json" \
+  --from-literal=STORAGE_BUCKET_NAME="" \
+  --from-literal=SECRET_KEY="" \
+  --from-literal=DATABASE_ENGINE="" \
+  --from-literal=DATABASE_NAME="" \
+  --from-literal=DATABASE_USER="" \
+  --from-literal=DATABASE_PASSWORD="" \
+  --from-literal=DATABASE_HOST="" \
+  --from-literal=DATABASE_PORT="" \
+  --from-literal=NEXT_PUBLIC_BACKEND_URL="" \
+  --namespace=model-serving
+```
+- Then, deploy txt2img app:
+
 ```bash
 cd helm/txt2img
 kubectl create ns model-serving
 kubens model-serving
 helm upgrade --install txt2img .
 ```
-After that, run scripts/update_backend_ip_on_k8s.sh 
+- After that, run scripts/update_backend_ip_on_k8s.sh 
 
 ```bash
 cd scripts
 chmod +x update_backend_ip_on_k8s.sh
 ./update_backend_ip_on_k8s.sh
 ```
-
 
 
 - Get IP address of nginx-ingress

@@ -7,11 +7,12 @@ NAMESPACE="model-serving"
 BACKEND_IP=$(kubectl get svc txt2img-backend -n ${NAMESPACE} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "Backend IP: ${BACKEND_IP}"
 
-# Update the secret with the backend IP
-helm upgrade --install txt2img ../helm/txt2img --namespace model-serving \
-  --set NEXT_PUBLIC_BACKEND_URL="http://${BACKEND_IP}:8000" 
+# Update the secret with the new backend URL
+kubectl get secret txt2img-credentials -n ${NAMESPACE} -o yaml | \
+sed "s|NEXT_PUBLIC_BACKEND_URL:.*|NEXT_PUBLIC_BACKEND_URL: $(echo -n "http://${BACKEND_IP}:8000" | base64)|" | \
+kubectl apply -f -
 
-# Delete existing frontend pods to force recreation with new secret
+# Delete existing frontend pods to force recreation
 kubectl delete pods -n ${NAMESPACE} -l app=txt2img-frontend
 
 # Wait for new pods

@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-backend
   namespace: model-serving
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}-backend
@@ -16,6 +16,8 @@ spec:
       containers:
       - name: backend
         image: {{ .Values.image.repository }}/txt2img_backend:{{ .Values.image.tag }}
+        ports:
+        - containerPort: {{ .Values.service.backendPort }}
         env:
         - name: CREDENTIAL_JSON_FILE_NAME
           value: "/app/credentials/namsee_key.json"

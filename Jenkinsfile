@@ -12,29 +12,31 @@ pipeline {
         envCredential = 'env-variables'
         keyCredential = 'namsee_key'
         sonarProjectKey = 'your-sonarqube-project-key'
+        sonarCredential = 'sonar-jenkins-token'
     }
 
     stages {
         stage('SonarQube Analysis') {
             environment {
-                SONARQUBE_URL = 'http://localhost:9000'
-                SONARQUBE_TOKEN = 'sqa_5a668d71d5b9fb27e06a9d0618355aa3ac622b8e'
+                SONARQUBE_URL = 'http://34.123.79.132:9000'
                 SONARQUBE_PROJECT_KEY = 'TextToImage'
                 SONARQUBE_PROJECT_NAME = 'TextToImageProject'
             }
             steps {
-                script {
-                scannerHome = tool 'SonarScanner'
-                }
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                    -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                    -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=${SONARQUBE_URL} \
-                    -Dsonar.login=${SONARQUBE_TOKEN}
-                    """
+                withCredentials([string(credentialsId: 'sonar-jenkins-token', variable: 'SONARQUBE_TOKEN')]) {
+                    script {
+                        scannerHome = tool 'SonarScanner'
+                    }
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                        -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=${SONARQUBE_URL} \
+                        -Dsonar.login=${SONARQUBE_TOKEN}
+                        """
+                    }
                 }
             }
         }

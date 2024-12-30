@@ -123,7 +123,7 @@ pipeline {
             }
             
             environment {
-                TRIVY_TIMEOUT = '50m' // Set timeout to 50 minutes
+                TRIVY_TIMEOUT = '120m' // Set timeout to 120 minutes
             }
 
             steps {

@@ -8,7 +8,7 @@ BACKEND_IP=$(kubectl get svc txt2img-backend -n ${NAMESPACE} -o jsonpath='{.stat
 echo "Backend IP: ${BACKEND_IP}"
 
 # Update the secret with the backend IP
-helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+helm upgrade --install txt2img ../helm/txt2img --namespace model-serving \
   --set NEXT_PUBLIC_BACKEND_URL="http://${BACKEND_IP}:8000" \
 
 # Delete existing frontend pods to force recreation with new secret

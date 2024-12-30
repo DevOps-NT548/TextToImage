@@ -128,8 +128,8 @@ pipeline {
 
             steps {
                 script {
-                    sh 'trivy image ${registry}_backend:latest'
-                    sh 'trivy image ${registry}_frontend:latest'
+                    sh 'trivy image --scanners vuln ${registry}_backend:latest'
+                    sh 'trivy image --scanners vuln ${registry}_frontend:latest'
                 }
             }
         }

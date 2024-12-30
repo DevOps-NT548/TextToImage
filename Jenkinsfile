@@ -27,14 +27,14 @@ pipeline {
                     }
                     withSonarQubeEnv('SonarQube') {
                         echo 'Running SonarQube analysis..'
-                        // sh """
-                        // ${scannerHome}/bin/sonar-scanner \
-                        // -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                        // -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
-                        // -Dsonar.sources=. \
-                        // -Dsonar.host.url=${SONARQUBE_URL} \
-                        // -Dsonar.login=${SONARQUBE_TOKEN}
-                        // """
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+                        -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=${SONARQUBE_URL} \
+                        -Dsonar.login=${SONARQUBE_TOKEN}
+                        """
                     }
                 }
             }
@@ -55,17 +55,17 @@ pipeline {
                             file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
                         ]) {
                             echo 'Setting up environment variables and running backend tests..'
-                            // sh '''
-                            // # Write the .env file
-                            // echo "$ENV_VARS" > .env
-                            // echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
-                            // export $(cat .env | xargs)
+                            sh '''
+                            # Write the .env file
+                            echo "$ENV_VARS" > .env
+                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
+                            export $(cat .env | xargs)
 
-                            // # Run the backend tests
-                            // cd Backend
-                            // pip install -r requirements.txt
-                            // python manage.py test
-                            // '''
+                            # Run the backend tests
+                            cd Backend
+                            pip install -r requirements.txt
+                            python manage.py test
+                            '''
                         }
                     }
                 }
@@ -77,12 +77,12 @@ pipeline {
                     }
                     steps {
                         echo 'Testing frontend..'
-                        // sh '''
-                        // cd Frontend
-                        // npm install
-                        // npm run lint
-                        // npm run build
-                        // '''
+                        sh '''
+                        cd Frontend
+                        npm install
+                        npm run lint
+                        npm run build
+                        '''
                     }
                 }
             }
@@ -92,26 +92,26 @@ pipeline {
             steps {
                 script {
                     echo 'Building backend image for deployment..'
-                    // def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
-                    // def backendImage = docker.build("${registry}_backend:latest", 
-                    //                                 "-f ${backendDockerfile} .")
+                    def backendDockerfile = 'deployment/model_predictor/Backend_Dockerfile'
+                    def backendImage = docker.build("${registry}_backend:latest", 
+                                                    "-f ${backendDockerfile} .")
                     
                     echo 'Building frontend image for deployment..'
-                    // def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
-                    // def frontendImage = docker.build("${registry}_frontend:latest", 
-                    //                                  "-f ${frontendDockerfile} .")
+                    def frontendDockerfile = 'deployment/model_predictor/Frontend_Dockerfile'
+                    def frontendImage = docker.build("${registry}_frontend:latest", 
+                                                     "-f ${frontendDockerfile} .")
                     
                     echo 'Pushing backend image to dockerhub..'
-                    // docker.withRegistry('', registryCredential) {
-                    //     backendImage.push()
-                    //     backendImage.push('latest')
-                    // }
+                    docker.withRegistry('', registryCredential) {
+                        backendImage.push()
+                        backendImage.push('latest')
+                    }
                     
                     echo 'Pushing frontend image to dockerhub..'
-                    // docker.withRegistry('', registryCredential) {
-                    //     frontendImage.push()
-                    //     frontendImage.push('latest')
-                    // }
+                    docker.withRegistry('', registryCredential) {
+                        frontendImage.push()
+                        frontendImage.push('latest')
+                    }
                 }
             }
         }
@@ -131,8 +131,8 @@ pipeline {
             steps {
                 script {
                     echo 'Scanning backend image for vulnerabilities..'
-                    //sh 'trivy image --scanners vuln ${registry}_backend:latest'
-                    //sh 'trivy image --scanners vuln ${registry}_frontend:latest'
+                    sh 'trivy image ${registry}_backend:latest'
+                    sh 'trivy image ${registry}_frontend:latest'
                 }
             }
         }

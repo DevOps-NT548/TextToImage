@@ -16,30 +16,30 @@ pipeline {
     }
 
     stages {
-        stage('SonarQube Analysis') {
-            environment {
-                SONARQUBE_URL = 'http://34.123.79.132:9000'
-                SONARQUBE_PROJECT_KEY = 'TextToImage'
-                SONARQUBE_PROJECT_NAME = 'TextToImageProject'
-            }
-            steps {
-                withCredentials([string(credentialsId: 'sonar-jenkins-token', variable: 'SONARQUBE_TOKEN')]) {
-                    script {
-                        scannerHome = tool 'SonarScanner'
-                    }
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
-                        -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=${SONARQUBE_URL} \
-                        -Dsonar.login=${SONARQUBE_TOKEN}
-                        """
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     environment {
+        //         SONARQUBE_URL = 'http://34.123.79.132:9000'
+        //         SONARQUBE_PROJECT_KEY = 'TextToImage'
+        //         SONARQUBE_PROJECT_NAME = 'TextToImageProject'
+        //     }
+        //     steps {
+        //         withCredentials([string(credentialsId: 'sonar-jenkins-token', variable: 'SONARQUBE_TOKEN')]) {
+        //             script {
+        //                 scannerHome = tool 'SonarScanner'
+        //             }
+        //             withSonarQubeEnv('SonarQube') {
+        //                 sh """
+        //                 ${scannerHome}/bin/sonar-scanner \
+        //                 -Dsonar.projectKey=${SONARQUBE_PROJECT_KEY} \
+        //                 -Dsonar.projectName=${SONARQUBE_PROJECT_NAME} \
+        //                 -Dsonar.sources=. \
+        //                 -Dsonar.host.url=${SONARQUBE_URL} \
+        //                 -Dsonar.login=${SONARQUBE_TOKEN}
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
 
         // stage('Test') {
         //     parallel {
@@ -116,70 +116,70 @@ pipeline {
         //     }
         // }
 
-        // stage('Trivy Scan') {
-        //     steps {
-        //         script {
-        //             sh 'trivy image ${registry}_backend:latest'
-        //             sh 'trivy image ${registry}_frontend:latest'
-        //         }
-        //     }
-        // }
-
-        stage('Deploy application to Google Kubernetes Engine') {
-            agent {
-                kubernetes {
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  namespace: model-serving
-spec:
-  serviceAccountName: jenkins-sa
-  containers:
-  - name: helm
-    image: dtzar/helm-kubectl:3.11.1
-    command:
-    - cat
-    tty: true
-'''
-                }
-            }
+        stage('Trivy Scan') {
             steps {
-                withCredentials([
-                    string(credentialsId: envCredential, variable: 'ENV_VARIABLES'),
-                    file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
-                ]) {
-                    script {
-                        echo 'Deploying application to GKE..'
-                        container('helm') {
-                            echo 'Setting up environment variables and deploying the application..'
-                            sh '''
-                            echo "$ENV_VARIABLES" > .env
-                            echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
-                            export $(cat .env | xargs)
-
-                            helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
-                            --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
-                            --set SECRET_KEY="$SECRET_KEY" \
-                            --set DATABASE_ENGINE="$DATABASE_ENGINE" \
-                            --set DATABASE_NAME="$DATABASE_NAME" \
-                            --set DATABASE_USER="$DATABASE_USER" \
-                            --set DATABASE_PASSWORD="$DATABASE_PASSWORD" \
-                            --set DATABASE_HOST="$DATABASE_HOST" \
-                            --set DATABASE_PORT="$DATABASE_PORT"
-                            '''
-
-                            echo 'Running update_backend_ip_on_k8s.sh script..'
-                            sh '''
-                            cd scripts
-                            chmod +x update_backend_ip_on_k8s.sh
-                            ./update_backend_ip_on_k8s.sh
-                            '''
-                        }
-                    }
+                script {
+                    sh 'trivy image ${registry}_backend:latest'
+                    sh 'trivy image ${registry}_frontend:latest'
                 }
             }
         }
+
+//         stage('Deploy application to Google Kubernetes Engine') {
+//             agent {
+//                 kubernetes {
+//                     yaml '''
+// apiVersion: v1
+// kind: Pod
+// metadata:
+//   namespace: model-serving
+// spec:
+//   serviceAccountName: jenkins-sa
+//   containers:
+//   - name: helm
+//     image: dtzar/helm-kubectl:3.11.1
+//     command:
+//     - cat
+//     tty: true
+// '''
+//                 }
+//             }
+//             steps {
+//                 withCredentials([
+//                     string(credentialsId: envCredential, variable: 'ENV_VARIABLES'),
+//                     file(credentialsId: keyCredential, variable: 'JSON_KEY_PATH')
+//                 ]) {
+//                     script {
+//                         echo 'Deploying application to GKE..'
+//                         container('helm') {
+//                             echo 'Setting up environment variables and deploying the application..'
+//                             sh '''
+//                             echo "$ENV_VARIABLES" > .env
+//                             echo "CREDENTIAL_JSON_FILE_NAME=$JSON_KEY_PATH" >> .env
+//                             export $(cat .env | xargs)
+
+//                             helm upgrade --install txt2img ./helm/txt2img --namespace model-serving \
+//                             --set STORAGE_BUCKET_NAME="$STORAGE_BUCKET_NAME" \
+//                             --set SECRET_KEY="$SECRET_KEY" \
+//                             --set DATABASE_ENGINE="$DATABASE_ENGINE" \
+//                             --set DATABASE_NAME="$DATABASE_NAME" \
+//                             --set DATABASE_USER="$DATABASE_USER" \
+//                             --set DATABASE_PASSWORD="$DATABASE_PASSWORD" \
+//                             --set DATABASE_HOST="$DATABASE_HOST" \
+//                             --set DATABASE_PORT="$DATABASE_PORT"
+//                             '''
+
+//                             echo 'Running update_backend_ip_on_k8s.sh script..'
+//                             sh '''
+//                             cd scripts
+//                             chmod +x update_backend_ip_on_k8s.sh
+//                             ./update_backend_ip_on_k8s.sh
+//                             '''
+//                         }
+//                     }
+//                 }
+//             }
+//         }
     }
 
     post {

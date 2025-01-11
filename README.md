@@ -41,42 +41,42 @@
 <!--te-->
 
 ## Overal architecture
-![overal architecture](images/MLops_flowchart.png)
+![overal architecture](images/mlops_flowchart.png)
 
 ## Project structure
 ```bash
-├── ansible                      # Ansible configurations for GCE
-├── data                         # Storing data files
-├── deployment                   # Deployment-related configurations
-│   ├── jenkins                  # Jenkins deployment configurations
-│   │   ├── build_jenkins_image.sh 
-│   │   ├── docker-compose.yaml     
-│   │   └── Dockerfile             
-│   ├── mlflow                   # MLflow deployment configurations
-│   │   ├── build_mlflow_image.sh  
-│   │   ├── docker-compose.yaml     
-│   │   ├── Dockerfile             
-│   │   └── run_env                 # Environment for running MLflow
-│   │       └── data                # Data directory for MLflow
-│   │           └── mlflow.db       # MLflow SQLite database
-│   └── model_predictor          #  App deployment configurations
-│       ├── docker-compose.yaml     
-│       └── Dockerfile             
-├── helm                         # Helm charts for Kubernetes deployments
-│   ├── disaster_chart           # Helm chart for app
-│   ├── grafana-prometheus       # Helm chart for Grafana and Prometheus 
-│   ├── mlflow                   # Helm chart for MLflow deployment
-│   └── nginx-ingress            # Helm chart for Nginx Ingress setup
-├── Jenkinsfile                  # Jenkins pipeline configuration file
-├── main.py                      # app fast api 
-├── Makefile                     
-├── models                       # Folder for storing trained models
-├── notebook                     # EDA
-├── README.md                    
-├── requirements.txt             # Python package dependencies
-├── src                          # Source code directory
-├── terraform                    # Terraform configurations for GKE
-└── test                         # Folder for storing test scripts
+project-root/
+├── ansible/                     # Ansible configurations for GCE 
+│   └── ...
+├── Backend/                     # Backend service
+│   ├── account/
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── services/
+│   ├── setup.sh
+│   └── txt2img/
+├── Frontend/                    # Frontend service
+│   ├── app/
+│   ├── next.config.js
+│   ├── package.json
+│   └── ...
+├── deployment/                  # Deployment configurations
+│   ├── jenkins/                # Jenkins deployment
+│   ├── model_predictor/        # Model predictor deployment
+│   └── ...
+├── helm/                       # Helm charts
+│   ├── grafana-prometheus/     # Monitoring stack
+│   ├── nginx-ingress/         # Ingress controller
+│   └── txt2img/               # Application chart
+├── Model/                      # ML model files
+├── terraform/                  # Infrastructure as Code
+│   ├── main.tf
+│   ├── variables.tf
+│   └── output.tf
+├── scripts/                    # Utility scripts
+├── Jenkinsfile                 # CI/CD pipeline
+├── Makefile                    # Build automation
+└── README.md                   # Documentation
 ```
 ## Getting Started
 
@@ -86,7 +86,7 @@ To get started with this project, we will need to do the following
 
 Clone the repository to your local machine.
 
-`git clone git@github.com:quochungtran/NLP-with-Disaster-Tweets.git`
+`git clone https://github.com/DevOps-NT548/TextToImage.git`
 
 Install all dependencies dedicated to the project
 
@@ -106,9 +106,9 @@ pip install -r requirements.txt
 make app_local_up
 ```
 
-Navigating FastAPI deployement model using `localhost:8080/docs` on host machine
+Navigating deployement model using `localhost:3000` on host machine
 
-![app_api](images/appAPI_local.png)
+![app_api](images/app_local.png)
 
 
 ## Cloud migration
@@ -139,7 +139,7 @@ Y
 
 - Go back to your terminal, in which you typed `gcloud init`, type 1, and Enter.
 
-- Then type Y, select the GCE zone corresponding to asia-southeast1-b (in my case), then Enter.
+- Then type Y, select the GCE zone corresponding to us-central-1a (in my case), then Enter.
 
 
 #### Install gke-cloud-auth-plugin
@@ -158,7 +158,7 @@ Terraform is a powerful infrastructure as code tool that allows us to define and
 
 To provision a GKE cluster using Terraform, follow these steps:
 
-- We should update the invidual project ID, the corresponding GKE zone and its node machine. In my case, a gke cluster will be deployed in zone `europe-west4-a` with its node machine is: 
+- We should update the invidual project ID, the corresponding GKE zone and its node machine. In my case, a gke cluster will be deployed in zone `us-central-1a` with its node machine is: 
 
 ```bash 
 cd terraform
@@ -174,7 +174,7 @@ terraform apply # Apply the configuration to create the GKE cluster
 - connect to gke cluster using `gcloud cli`
 
 ```bash
-gcloud container clusters get-credentials mlops-415023-gke --zone europe-west4-a --project mlops-415023
+gcloud container clusters get-credentials mlops-415023-gke --zone us-central-1a --project mlops-415023
 ```
 - To view your highlighted cluster ID in the terminal, you can use the `kubectx` command.
 
@@ -214,7 +214,7 @@ kubectl get pods -n nginx-ingress
 
 ##### Deploy model serving service
 
-I decided to deploy the FastAPI application container on GKE within the model-serving namespace. Two replicas will be created, corresponding to the two pods.
+I decided to deploy the application container on GKE within the model-serving namespace. Two replicas will be created, corresponding to the two pods.
 
 - First, create configmap: 
 ```bash
@@ -446,5 +446,4 @@ Moreover, we've implemented a custom dashboard in Grafana to monitor specific re
 
 ![prometheus](images/prometheus.png)
 
-In addition to infrastructure monitoring, a model tracking service is provided accessibly via http://mlflow.tracking.com:5001. This platform allows us to efficiently manage and track model artifacts, performance metrics, dataset sizes, and other relevant information, providing valuable insights into model inference processes.
 

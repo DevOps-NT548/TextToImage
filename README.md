@@ -33,6 +33,7 @@
       - [Create jenkins service account in GKE](#create-jenkins-service-account-in-gke)
     - [Continuous deployment](#continuous-deployment)
   - [Demo](#demo)
+  - [TODOS](#todos)
          
 
 
@@ -174,7 +175,7 @@ terraform apply # Apply the configuration to create the GKE cluster
 - connect to gke cluster using `gcloud cli`
 
 ```bash
-gcloud container clusters get-credentials mlops-415023-gke --zone us-central-1a --project mlops-415023
+gcloud container clusters get-credentials linen-walker-444306-k9-gke --zone us-central1-a --project linen-walker-444306-k9
 ```
 - To view your highlighted cluster ID in the terminal, you can use the `kubectx` command.
 
@@ -434,7 +435,7 @@ An overview of success build pipeline in jenkins:
 
 ### Demo 
 
-To explore the Disaster classification API, you can access http://disaster.classify.com/docs. This endpoint provides a comprehensive overview of the API's functionality, allowing you to test its capabilities effortlessly.
+To explore the text to image app, you can access http://txt2img.com/. This endpoint will redirect you to the application service running on GKE.
 
 ![fastAPI](images/fast_api.gif)
 
@@ -447,3 +448,7 @@ Moreover, we've implemented a custom dashboard in Grafana to monitor specific re
 ![prometheus](images/prometheus.png)
 
 
+### TODOS
+- Integrate ArgoCD for continuous deployment
+- Fixed alertmanager issue
+- Refactor the codebase

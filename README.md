@@ -107,7 +107,7 @@ pip install -r requirements.txt
 make app_local_up
 ```
 
-Navigating deployement model using `localhost:3000` on host machine
+Navigating deployement model using `localhost:3000` on your host machine
 
 ![app_api](images/app_local.png)
 
